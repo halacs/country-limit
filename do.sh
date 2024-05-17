@@ -8,7 +8,12 @@ IFACE="ens3"	# internet facing network interface
 BASE_DIR="$(dirname $0)"
 COUNTRIES_DIR="${BASE_DIR}/countries"
 
+v4listAllowed="countries_allowed_v4"
+v6listAllowed="countries_allowed_v6"
+
 function downloadCountries() {
+	echo Updating IP ranges from ipdeny.com
+
 	mkdir -p ${COUNTRIES_DIR}
 	#rm ${COUNTRIES_DIR}/*
 
@@ -23,9 +28,6 @@ function downloadCountries() {
 }
 
 function updatesCountryList() {
-	v4listAllowed="countries_allowed_v4"
-	v6listAllowed="countries_allowed_v6"
-
 	echo Creating ipsets
 	ipset -exist create "${v4listAllowed}" hash:net family inet
 	ipset -exist create "${v6listAllowed}" hash:net family inet6
@@ -68,7 +70,9 @@ function updatesCountryList() {
 }
 
 function initIpTables() {
-	CHAIN_NAME="country_allow"
+	echo Configuring iptables
+
+	CHAIN_NAME="my-ipset-rules"
 
 	# IPv4
 	iptables -N ${CHAIN_NAME} && \
@@ -101,13 +105,27 @@ function initIpTables() {
 	done
 }
 
-echo ${COUNTRIES_DIR}
+echo Countires directory: ${COUNTRIES_DIR}
 
-if [ "${1}" == "update" ]; then
-	echo Updating IP ranges
-	downloadCountries
-fi
+case ${1} in
 
-updatesCountryList
-initIpTables
+  iptables)
+	 initIpTables
+    ;;
+
+  ipset)
+	 updatesCountryList
+    ;;
+
+  download)
+	 downloadCountries
+    ;;
+
+  *)
+    echo 'Select one option!'
+	 echo '1) iptables	- create required iptables chanin and rules'
+	 echo '2) ipset 		- create ip sets based on the already downloaded country secific IP lists'
+    echo '3) download	- download contry specific IP lists from ipdeny.com'
+    ;;
+esac
 
