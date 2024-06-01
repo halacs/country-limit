@@ -1,9 +1,18 @@
 #!/bin/bash
 # vim: ts=3
 
-COUNTRIES=('hu' 'de')	# only these countries can connect to below ports
-PORTS=('993' '21115' '21116' '21117')	# IMAP, RustDesk
-IFACE="ens3"	# internet facing network interface
+# only these countries can connect to below ports
+COUNTRIES=('hu' 'de')
+
+# 22		- SSH	
+# 993		- IMAP
+# 21115	- RustDesk
+# 21116	- RustDesk
+# 21117	- RustDesk
+PORTS=('22' '993' '21115' '21116' '21117')
+
+# internet facing network interface
+IFACE="ens3"
 
 BASE_DIR="$(dirname $0)"
 COUNTRIES_DIR="${BASE_DIR}/countries"
